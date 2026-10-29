@@ -2,7 +2,7 @@
 
 A compact, end-to-end Retrieval-Augmented Generation (RAG) demo for answering employee policy questions from a PDF. The project is designed as a clear portfolio example of document ingestion, semantic search, source-grounded answering, and containerized delivery.
 
-> **Demo only:** The included policy document contains fictional company information. Do not use confidential client or employee data without appropriate access controls and data-protection measures.
+> **Demo only:** The included policy document belongs to the fictional company **NebulaForge Industries** and contains fictional policy information. Do not use confidential client or employee data without appropriate access controls and data-protection measures.
 
 ## Demo
 
