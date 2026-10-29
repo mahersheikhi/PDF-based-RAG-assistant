@@ -11,7 +11,7 @@ policies = [
 ]
 
 styles = getSampleStyleSheet()
-story = [Paragraph("Northstar Company - Employee Policies", styles["Title"]), Spacer(1, .5 * cm)]
+story = [Paragraph("NebulaForge Industries - Fictional Employee Policies", styles["Title"]), Spacer(1, .5 * cm)]
 for heading, text in policies:
     story += [Paragraph(heading, styles["Heading2"]), Paragraph(text, styles["BodyText"]), Spacer(1, .4 * cm)]
 SimpleDocTemplate("company_policies_demo.pdf", pagesize=A4, leftMargin=2*cm, rightMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm).build(story)
