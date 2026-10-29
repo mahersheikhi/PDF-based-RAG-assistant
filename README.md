@@ -4,6 +4,12 @@ A compact, end-to-end Retrieval-Augmented Generation (RAG) demo for answering em
 
 > **Demo only:** The included policy document contains fictional company information. Do not use confidential client or employee data without appropriate access controls and data-protection measures.
 
+## Demo
+
+![Terminal demo](assets/demo.svg)
+
+The animation shows the typical flow: an employee question, policy retrieval, and a source-grounded answer.
+
 ## What it does
 
 1. Creates a sample employee-policy PDF.
