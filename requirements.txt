@@ -1,0 +1,5 @@
+chromadb
+pypdf
+reportlab
+requests
+sentence-transformers
