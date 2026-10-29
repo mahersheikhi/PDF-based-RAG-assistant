@@ -55,8 +55,8 @@ Source-grounded answer
 ### Run locally
 
 ```powershell
-git clone https://github.com/mahersheikhi/RAG_PDF_DEMO.git
-cd RAG_PDF_DEMO
+git clone https://github.com/mahersheikhi/PDF-based-RAG-assistant.git
+cd PDF-based-RAG-assistant
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
