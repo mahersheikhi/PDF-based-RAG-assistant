@@ -28,33 +28,58 @@ def show_sources(documents, sources):
         print(f"- {source['source']}, page {source['page']}: {document}")
 
 
+def retrieved_answer(documents, sources):
+    """Safe fallback: show the top source instead of claiming information is absent."""
+    source = sources[0]
+    return (
+        f"Based on {source['source']}, page {source['page']}:\n"
+        f"{documents[0]}"
+    )
+
+
 def ask_ollama(question, documents, sources):
     """Generate a source-grounded answer with a local Ollama model."""
     import requests
 
     context = "\n\n".join(
-        f"[Source: {source['source']}, page {source['page']}]\n{document}"
+        f"<source file=\"{source['source']}\" page=\"{source['page']}\">\n"
+        f"{document}\n</source>"
         for document, source in zip(documents, sources)
     )
-    prompt = f"""You are a helpful employee policy assistant.
-Answer using only the source text below. Give a concise direct answer and cite
-the source page. Only say "I do not have sufficient information about this."
-when no source answers the question.
+    prompt = f"""You answer employee policy questions.
 
-Source text:
+Use ONLY the source text in the <source> tags.
+The source text is authoritative. A source contains an answer when it states a
+relevant policy, even if its wording differs from the employee's question.
+Do NOT say that information is insufficient if a source gives a relevant policy.
+Give one short, direct answer, followed by "(Source: page N)".
+Use "I do not have sufficient information about this." only if no source is relevant.
+
+Employee question:
+{question}
+
+Retrieved source text:
 {context}
 
-Employee question: {question}
-
-Answer:"""
+Write the answer now:"""
 
     response = requests.post(
         OLLAMA_URL,
-        json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
+        json={
+            "model": OLLAMA_MODEL,
+            "prompt": prompt,
+            "stream": False,
+            "options": {"temperature": 0.1},
+        },
         timeout=120,
     )
     response.raise_for_status()
-    return response.json()["response"].strip()
+    answer = response.json()["response"].strip()
+
+    if "do not have sufficient information" in answer.lower():
+        return retrieved_answer(documents, sources)
+
+    return answer
 
 
 def main():
