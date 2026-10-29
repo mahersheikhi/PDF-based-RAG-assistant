@@ -1,6 +1,7 @@
 """Interactive PDF-based RAG assistant."""
 from pathlib import Path
 import os
+import re
 
 import chromadb
 from pypdf import PdfReader
@@ -11,57 +12,79 @@ USE_LLM = True
 OLLAMA_MODEL = "qwen2.5:3b"
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 
+POLICY_HEADINGS = (
+    "IT and password policy",
+    "Vacation policy",
+    "Remote-work policy",
+    "Expense policy",
+)
+
+
+def split_policy_text(text):
+    """Split a policy page into small, searchable policy sections."""
+    heading_pattern = "|".join(re.escape(heading) for heading in POLICY_HEADINGS)
+    sections = re.split(f"(?=^{heading_pattern}$)", text, flags=re.MULTILINE)
+    return [
+        section.strip()
+        for section in sections
+        if any(section.strip().startswith(heading) for heading in POLICY_HEADINGS)
+    ]
+
 
 def read_pdf(path):
     chunks, metadata = [], []
+
     for page, item in enumerate(PdfReader(str(path)).pages, 1):
         text = (item.extract_text() or "").strip()
-        if text:
-            chunks.append(text)
-            metadata.append({"source": path.name, "page": page})
+        for section in split_policy_text(text):
+            topic = section.splitlines()[0]
+            chunks.append(section)
+            metadata.append({"source": path.name, "page": page, "topic": topic})
+
+    if not chunks:
+        raise ValueError("No readable policy text was found in the PDF.")
+
     return chunks, metadata
 
 
 def show_sources(documents, sources):
     print("\nRetrieved policy text:")
     for document, source in zip(documents, sources):
-        print(f"- {source['source']}, page {source['page']}: {document}")
+        print(f"- {source['topic']} ({source['source']}, page {source['page']}):")
+        print(f"  {document}")
 
 
 def retrieved_answer(documents, sources):
-    """Safe fallback: show the top source instead of claiming information is absent."""
+    """Safe fallback: show only the most relevant policy section."""
     source = sources[0]
     return (
-        f"Based on {source['source']}, page {source['page']}:\n"
+        f"Based on the {source['topic']} ({source['source']}, page {source['page']}):\n"
         f"{documents[0]}"
     )
 
 
 def ask_ollama(question, documents, sources):
-    """Generate a source-grounded answer with a local Ollama model."""
+    """Generate a concise answer using only retrieved policy sections."""
     import requests
 
     context = "\n\n".join(
-        f"<source file=\"{source['source']}\" page=\"{source['page']}\">\n"
+        f"<source topic=\"{source['topic']}\" page=\"{source['page']}\">\n"
         f"{document}\n</source>"
         for document, source in zip(documents, sources)
     )
     prompt = f"""You answer employee policy questions.
 
-Use ONLY the source text in the <source> tags.
-The source text is authoritative. A source contains an answer when it states a
-relevant policy, even if its wording differs from the employee's question.
-Do NOT say that information is insufficient if a source gives a relevant policy.
-Give one short, direct answer, followed by "(Source: page N)".
-Use "I do not have sufficient information about this." only if no source is relevant.
+Use ONLY the source text in the <source> tags. A source is authoritative.
+Give one short, direct answer and end with "(Source: page N)".
+Never say information is insufficient when a source answers the question.
+Only say "I do not have sufficient information about this." when no source is relevant.
 
-Employee question:
-{question}
+Employee question: {question}
 
 Retrieved source text:
 {context}
 
-Write the answer now:"""
+Answer:"""
 
     response = requests.post(
         OLLAMA_URL,
@@ -92,7 +115,7 @@ def main():
     )
     chunks, metadata = read_pdf(PDF_PATH)
     collection.upsert(
-        ids=[f"page_{index}" for index in range(1, len(chunks) + 1)],
+        ids=[f"policy_{index}" for index in range(len(chunks))],
         documents=chunks,
         metadatas=metadata,
         embeddings=model.encode(chunks, normalize_embeddings=True).tolist(),
