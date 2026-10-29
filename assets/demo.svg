@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="460" viewBox="0 0 1000 460" role="img" aria-label="RAG assistant terminal demo">
+<style>
+.bg{fill:#0d1117}.border{fill:none;stroke:#30363d;stroke-width:2}.title{fill:#58a6ff;font:700 25px monospace}.muted{fill:#8b949e;font:21px monospace}.text{fill:#e6edf3;font:21px monospace}.green{fill:#3fb950;font:21px monospace}.blue{fill:#58a6ff;font:21px monospace}
+.f1,.f2,.f3,.f4{opacity:0;animation:cycle 8s infinite}.f2{animation-delay:2s}.f3{animation-delay:4s}.f4{animation-delay:6s}@keyframes cycle{0%,24%{opacity:1}25%,100%{opacity:0}}
+</style>
+<rect class="bg" width="1000" height="460"/><rect class="border" x="22" y="18" width="956" height="424" rx="12"/><text class="title" x="52" y="67">PDF Policy RAG Assistant</text>
+<g class="f1"><text class="muted" x="52" y="120">Employee question:</text><text class="text" x="52" y="163">How do I reset my password?</text></g>
+<g class="f2"><text class="muted" x="52" y="120">Employee question: How do I reset my password?</text><text class="blue" x="52" y="165">Searching company policy PDF...</text></g>
+<g class="f3"><text class="muted" x="52" y="120">Employee question: How do I reset my password?</text><text class="green" x="52" y="165">Retrieved: IT and password policy (page 1)</text><text class="text" x="52" y="210">Employees can reset a forgotten password through the IT portal.</text></g>
+<g class="f4"><text class="muted" x="52" y="120">Employee question: How do I reset my password?</text><text class="green" x="52" y="165">Answer:</text><text class="text" x="52" y="210">Reset your password through the IT portal.</text><text class="muted" x="52" y="255">If it does not work, contact IT Support.</text><text class="blue" x="52" y="300">(Source: page 1)</text></g>
+</svg>
